@@ -1,0 +1,149 @@
+#lang Scheme
+(define (Tr m)
+  (apply map list m)
+  )
+(define (f1 n)
+  (define fi (/ (* pi 2) n))
+  (build-list n (λ (x) (cons (round (* 10 (cos (* fi x))))
+                             (round (* 10 (sin (* fi x))))))))
+(define (f2 lst)
+  
+  (define (it lst a1 a2 a3 rez)
+    (if (empty? (cdr lst)) (cons (list a1 a2 a3) rez)
+        (it (cdr lst) a1 (car lst) (cadr lst) (cons (list a1 a2 a3) rez))))
+  (it (cddr lst) (car lst) (cadr lst) (caddr lst) null))
+
+
+(define (f3 lst)
+  
+  (list (map (λ (str) (apply min str)) (Tr lst))
+        (map (λ (str) (apply max str)) (Tr lst))))
+
+(define (f5 lst)
+  (define A (car lst))
+  (define B (cadr lst))
+  (define C (caddr lst))
+
+  (define z (- (* (- (car A) (car B)) (- (cdr C) (cdr A)))
+               (* (- (cdr A)(cdr B)) (- (car C) (car A)))))
+  (define z_x (+
+               (* (- (cdr A)(cdr B))
+                  (+ (* (car C) (car C)) (* (cdr C) (cdr C))))
+               (* (- (cdr B) (cdr C))
+                  (+ (* (car A)(car A)) (* (cdr A) (cdr A))))
+               (* (- (cdr C) (cdr A))
+                  (+ (* (car B) (car B)) (* (cdr B) (cdr B))))))
+  (define z_y (+
+               (* (- (car A)(car B))
+                  (+ (* (car C) (car C)) (* (cdr C) (cdr C))))
+               (* (- (car B) (car C))
+                  (+ (* (car A)(car A)) (* (cdr A) (cdr A))))
+               (* (- (car C) (car A))
+                  (+ (* (car B) (car B)) (* (cdr B) (cdr B))))))
+
+
+  (cons (/ z_x (* 2 -1 z)) (/ z_y (* 2 z))))
+
+
+(define (f4 lst1 lst2)
+  (define n (length lst1))
+
+  
+  (define (find x n lst)
+    (if (equal? x (car lst)) n (find x (+ n 1) (cdr lst))))
+  
+  (define (sp a b)
+    (+ (* (car a) (car b)) (* (cdr a) (cdr b))))
+  
+  (define gl_l1 (foldl (λ (a gl)
+                         (cond
+                           ((< (sp a a) (sp gl gl)) a)
+                           ((= (sp a a) (sp gl gl)) (if (< (car a) (car gl)) a gl))
+                           (else gl))
+                         ) (car lst1) lst1))
+  
+  (define gl_l2 (foldl (λ (a gl)
+                         (cond
+                           ((< (sp a a) (sp gl gl)) a)
+                           ((= (sp a a) (sp gl gl)) (if (< (car a) (car gl)) a gl))
+                           (else gl))
+                         ) (car lst2) lst2))
+  (define nl1 (map (λ (x) (cons (- (car x) (car gl_l1)) (- (cdr x) (cdr gl_l1))) ) lst1))
+  (define nl2 (map (λ (x) (cons (- (car x) (car gl_l2)) (- (cdr x) (cdr gl_l2))) ) lst2))
+
+  (define pered_gl_l1 (let ((i (find (cons 0 0) 0 nl1)))
+                        (if (= i 0) (list-ref nl1 (- n 1))
+                            (list-ref nl1 (- i 1)))))
+  (define posle_gl_l1 (let ((i (find (cons 0 0) 0 nl1)))
+                        (if (= i 0) (cadr nl1)
+                            (if (= i (- n 1)) (car nl1)
+                                (list-ref nl1 (+ i 1))))))
+
+  (define pered_gl_l2 (let ((i (find (cons 0 0) 0 nl2)))
+                        (if (= i 0) (list-ref nl2 (- n 1))
+                            (list-ref nl2 (- i 1)))))
+  (define posle_gl_l2 (let ((i (find (cons 0 0) 0 nl2)))
+                        (if (= i 0) (cadr nl2)
+                            (if (= i (- n 1)) (car nl2)
+                                (list-ref nl2 (+ i 1))))))
+
+  (define koef_peredov (cond
+                         ((or (= 0 (car pered_gl_l1) (cdr  pered_gl_l2))
+                              (= 0 (cdr pered_gl_l1) (car  pered_gl_l2))) #f)
+                         ((or (= 0 (car pered_gl_l1)) (= 0 (car pered_gl_l2)))
+                          (/ (cdr pered_gl_l1) (cdr  pered_gl_l2)))
+                         ((or (= 0 (cdr pered_gl_l1)) (= 0 (cdr pered_gl_l2)))
+                          (/ (car pered_gl_l1) (car  pered_gl_l2)))
+                         ((= (/ (car pered_gl_l1) (car  pered_gl_l2))
+                             (/ (cdr pered_gl_l1) (cdr  pered_gl_l2)))
+                          (/ (car pered_gl_l1) (car  pered_gl_l2)))
+                         (else #f)))
+  (define koef_posle (cond
+                       ((or (= 0 (car posle_gl_l1) (cdr  posle_gl_l2))
+                            (= 0 (cdr posle_gl_l1) (car  posle_gl_l2))) #f)
+                       ((or (= 0 (car posle_gl_l1)) (= 0 (car posle_gl_l2)))
+                        (/ (cdr posle_gl_l1) (cdr  posle_gl_l2)))
+                       ((or (= 0 (cdr posle_gl_l1)) (= 0 (cdr posle_gl_l2)))
+                        (/ (car posle_gl_l1) (car posle_gl_l2)))
+                       ((= (/ (car posle_gl_l1) (car  posle_gl_l2))
+                           (/ (cdr posle_gl_l1) (cdr  posle_gl_l2)))
+                        (/ (car posle_gl_l1) (car  posle_gl_l2)))
+                       (else #f)))
+  
+  (define koef_pered_posl (cond
+                            ((or (= 0 (car pered_gl_l1) (cdr  posle_gl_l2))
+                                 (= 0 (cdr pered_gl_l1) (car  posle_gl_l2))) #f)
+                            ((or (= 0 (car pered_gl_l1)) (= 0 (car posle_gl_l2)))
+                             (/ (cdr pered_gl_l1) (cdr  posle_gl_l2)))
+                            ((or (= 0 (cdr pered_gl_l1)) (= 0 (cdr posle_gl_l2)))
+                             (/ (car pered_gl_l1) (car posle_gl_l2)))
+                            ((= (/ (car pered_gl_l1) (car  posle_gl_l2))
+                                (/ (cdr pered_gl_l1) (cdr  posle_gl_l2)))
+                             (/ (car pered_gl_l1) (car  posle_gl_l2)))
+                            (else #f)))
+  (define (it i lst)
+    (append (drop lst i)  (take lst i)))
+  (and (= (length lst1) (length lst2))
+  (or (if (and koef_peredov koef_posle (= koef_peredov koef_posle))
+          (andmap (λ (x y)
+                    (equal? x (cons (* koef_peredov (car y))
+                                    (* koef_peredov (cdr y)))))
+                  (it (find (cons 0 0) 0  nl1) nl1)
+                  (it (find (cons 0 0) 0  nl2) nl2))
+          #f)
+
+      (if koef_pered_posl
+          (let ((rev_nl2 (reverse nl2)))
+            (andmap (λ (x y)
+                      (equal? x (cons (* koef_pered_posl (car y))
+                                      (* koef_pered_posl (cdr y)))))
+                    (it (find (cons 0 0) 0  nl1) nl1)
+                    (it (find (cons 0 0) 0  rev_nl2) rev_nl2)))
+          #f)))
+  
+ 
+  )
+                         
+                           
+                                
+

@@ -1,0 +1,75 @@
+#lang scheme
+
+(define (di w d)
+        (if (null? d) (error "что-то не так с входными данными")
+            (if (equal? w (caar d))
+                (cdar d)
+                (di w (cdr d))
+            )
+        )
+    )
+
+(define (wrote lst out)
+  (if (null? lst) (void)
+      (begin
+        (write-char (car lst) out)
+        (wrote (cdr lst) out)
+      )
+  )
+)
+
+(define (f5)
+    (define in (open-input-file "in.txt"))
+    (define out (open-output-file "out.txt" #:exists 'replace))
+    (define dict (open-input-file "dict.txt"))
+    ; 1) make dictionary
+    (define (updres k w res)
+        (cons
+            (cons k (reverse w))
+            res
+        )
+    )
+    (define (iter-dict k w mode res)
+        (define ch (read-char dict))
+        
+        (if (equal? ch eof)
+            (updres k w res)
+            (if mode
+                (if (equal? ch #\return)
+                    (begin
+                        (read-char dict)
+                        (iter-dict '() '() #f (updres k w res))
+                    )
+                    (iter-dict k (cons ch w) mode res)
+                )
+                (if (equal? ch #\space)
+                    (iter-dict k w #t res)
+                    (iter-dict (cons ch k) w #f res)
+                )
+            )
+        )
+    )
+    (define D (iter-dict '() '() #f '()))
+    
+    (define (iter w was)
+        (define ch (read-char in))
+        (if (equal? ch eof)
+            (wrote (di w D) out)
+            (if (or (equal? ch #\space) (equal? ch #\return) (equal? ch #\tab))
+                (begin
+                  (when was (wrote (di w D) out))
+                  (when (equal? ch #\space)
+                      (display " " out))
+                  (when (equal? ch #\tab)
+                    (display "	" out))
+                  (when (equal? ch #\return) (begin (newline out) (read-char in)))
+                  (iter '() #f)
+                )
+                (iter (cons ch w) #t)
+                    
+            )
+        )
+    )
+    (iter '() #f)
+    (close-output-port out)
+)

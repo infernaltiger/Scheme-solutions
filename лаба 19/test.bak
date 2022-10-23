@@ -1,0 +1,77 @@
+#lang Scheme
+(define (funcsQuantity inF)
+	; notice: counts all functions, defined via template (define (funcname)).
+	; functions. defined via (define funcname (lambda (x))) are valid, but ignored, because task definition says we shoudn't count lambdas
+	(define in (open-input-file inF))
+	(define (iter state n)
+		(define new_char (read-char in))
+		(cond
+			[(equal? new_char eof) (begin (close-input-port in) n)]
+			[(equal? new_char #\( ) 
+				(cond
+					[(= state 0) (iter 1 n)]
+					[(= state 7) (iter 0 (+ n 1))]
+					[(= state 13) (iter 0 n)]
+					[(and (>= state 8) (<= state 16)) (iter state n)]
+					[else (iter 0 n)]
+				)
+			]
+			[(and (equal? new_char #\d) (= state 1) ) (iter 2 n)]
+			[(equal? new_char #\e)
+				(cond
+					[(and (>= state 8) (<= state 16)) (iter state n)]
+					[(= state 2) (iter 3 n)]
+					[(= state 6) (iter 7 n)]
+					[else (iter 0 n)]
+				)
+			]
+			[(and (equal? new_char #\f) (= state 3)) (iter 4 n)]
+			[(and (equal? new_char #\i) (= state 4)) (iter 5 n)]
+			[(and (equal? new_char #\n) (= state 5)) (iter 6 n)]
+
+			[(or (equal? new_char #\newline)
+				 (equal? new_char #\return)
+			 )
+				(iter (if (or (= state 8) (and (not (= state 11)) (>= state 0) (<= state 15))) 0 state) n)
+			]
+			[(equal? new_char #\ ) (iter (if (or (= state 1) (= state 7) (= state 8) (= state 11) (= state 15)) state 0) n) ]
+			[(equal? new_char #\;) (iter (if (>= state 8) state 8) n)]
+			[(equal? new_char #\#)
+				(cond
+					[(= state 8) (iter 8 n)] ; ignore switch inside whole line comment
+					[(= state 9) (iter 10 n)] ; not a code until space
+					[(= state 10) (iter 10 n)]
+					[(= state 12) (iter 0 n)]
+					[(= state 13) (iter 13 n)]
+					[else (iter 9 n)]
+				)
+			]
+			[(equal? new_char #\|)
+				(cond
+					[(= state 9) (iter 11 n)]
+					[(= state 11) (iter 12 n)]
+					[else (iter state n)]
+				)
+			]
+			[(equal? new_char #\\)
+				(cond
+					[(= state 8) (iter 8 n)]
+					[(= state 9) (iter 13 n)]
+					[(= state 13) (iter 0 n)]
+					[(= state 15) (iter 16 n)]
+					[(= state 16) (iter 15 n)]
+					[else (iter 14 n)]
+				)
+			]
+			[(equal? new_char #\")
+				(cond
+					[(= state 15) (iter 0 n)]
+					[(= state 16) (iter 15 n)]
+					[else (iter 15 n)]
+				)
+			]
+			[else (iter (if (or (= state 8) (= state 11)) state 0) n)]
+		)
+	)
+	(iter 0 0)
+)

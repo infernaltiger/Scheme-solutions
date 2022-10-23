@@ -1,0 +1,45 @@
+#lang Scheme
+(define % remainder)
+(define // quotient)
+
+(define (kol x)
+  (define (it n stp10 a s)
+    (if (>= s x) n
+        (it (+ 1 n) (* stp10 10) (* (+ 1 n) 9 (* 10 stp10)) (+ s (* (+ 1 n) 9 (* 10 stp10))) )
+        ))
+  (it 1 1 9 9)
+  )
+(define (pred x)
+  (define (it n stp10 a s)
+    (if (>= s x) (- s a)
+        (it (+ 1 n) (* stp10 10) (* (+ 1 n) 9 (* 10 stp10)) (+ s (* (+ 1 n) 9 (* 10 stp10))) )
+        ))
+  (it 1 1 9 9)
+  )
+(define (kol9 x)
+  (define (it x s stp10)
+    (if (= x 0) s
+        (it (- x 1) (+ s (* 9 stp10)) (* stp10 10))
+        )
+    )(it x 0 1)
+  )
+(define (vozv x n)
+  (define (it x n)
+    (if (= n 0) (% x 10) (it (// x 10) (- n 1)))
+    ) (it x n)
+  ) 
+(define k 0)
+(define (f x)
+  (let
+      (
+       (n (kol x))
+       (a (pred x))
+       (k9 (kol9 (- (kol x) 1)))
+       )
+    (if (> n 1)
+        (set! k (if (= 0 (% (- x a) n)) (// (- x a) n) (+ 1 (// (- x a) n))))
+        (set! k x))
+  
+    (vozv (+ k k9) (- (+ (* k n) a) x))   
+    ))
+  

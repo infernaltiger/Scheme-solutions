@@ -1,0 +1,46 @@
+#lang Scheme
+(define (f1 str)
+  (define (it lst rez)
+    (if (empty? lst) rez (it (cdr lst) (+ (* rez 10 ) (- (char->integer (car lst)) 48))))
+    )
+  (it (string->list str) 0)
+  )
+
+(define (f2 str delim)
+  (length (split str delim))
+  )
+
+(define (f4 str)
+  (define (iter lst)
+    (if (empty? lst) #f
+        (if (member (car lst) (cdr lst))
+            (car lst)
+            (iter (cdr lst))
+            )
+        )
+    )
+  (iter (split str " ") )
+  )
+  
+
+
+(define (split str delim)
+  (define delim_lst (string->list delim))
+  (define str_lst (string->list str))
+
+  
+  (define (it str_lst n_1 n_2 rez)
+    (if (empty? str_lst) (reverse (cons (substring str n_1) rez))
+        (if (member (car str_lst) delim_lst)
+            (it (cdr str_lst) (+ n_2 1) (+ n_2 1)
+                (if (= n_1 n_2) rez (cons (substring str n_1 n_2) rez)))
+            (it (cdr str_lst) n_1 (+ n_2 1) rez)
+
+            )
+        )
+    )
+  (it str_lst 0 0 null)
+  )
+
+
+

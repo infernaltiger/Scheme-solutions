@@ -1,0 +1,16 @@
+#lang Scheme
+(define % remainder)
+(define // quotient)
+
+(define (f x)
+  (define (it d n)
+    (if (>= x (sqr d))
+        (if (and(= 0 (% x d)) (or (= x (sqr d)) (not(= (% x (sqr d)) 0 ))))
+            (it (+ 1 d) (+ 2 n))
+            (it (+ 1 d) n)
+            )
+        (if (= n 2) #t #f)
+    
+        ))
+  (it 2 0)
+  )

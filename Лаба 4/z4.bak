@@ -1,0 +1,4 @@
+#lang Scheme
+(define (f x)
+(flatten (cons (reverse (cdr x)) x))
+  )

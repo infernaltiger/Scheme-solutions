@@ -1,0 +1,26 @@
+(define (f a b c) (+ a b c))
+
+(define s "(define (g a) (- 0 a)")
+
+(define
+(h) 0)
+
+(define lst '(define (ff x) some))
+
+(define (rec n)
+(define (iter n)
+(if (= n 0) n "(iter (- n 1) )")
+)
+(rec (iter n))
+)
+
+#|
+(define (next n)
+(if (= n 0) 'stop
+(next (- n 1)))
+)
+|#
+
+[define {h2 x}
+(map h lst)
+]

@@ -1,0 +1,144 @@
+#lang Scheme
+(define make-tree list)
+(define data car)
+(define left cadr)
+(define right caddr)
+(define (leaf? tree) (and (empty? (left tree)) (empty? (right tree))) )
+
+(define (code_t lst)
+  (define (add_c ch lst tree)
+    (if (empty? lst) ch
+        (if (= (car lst) 0)
+            (cons (add_c ch (cdr lst) (nleft tree)) (nright tree))
+            (cons (nleft tree) (add_c ch (cdr lst) (nright tree))))))
+  (define (nleft tree)
+    (if (empty? tree) null (car tree))
+    )
+  (define (nright tree)
+    (if (empty? tree) null (cdr tree))
+    )
+
+  (foldl (λ (p t) (add_c (car p) (cdr p) t)) null lst)
+
+  )
+
+(define  (f1 lst_p)
+  
+  
+  (define (it lst1 lst2)
+    (if (empty? (cdr lst1)) (not (= (car lst1) (car lst2)))
+        (if (empty? (cdr lst2)) (not (= (car lst1) (car lst2)))
+            (if (= (car lst1) (car lst2))
+                (it (cdr lst1) (cdr lst2)) #t))))
+       
+    
+  (or (andmap (λ (x)
+                (andmap (λ (y) (let ((lst1 (cdr x))
+                                     (lst2 (cdr y)))
+                                 (if (equal? x y) #t
+                                     (it lst1 lst2)) ) ) lst_p))lst_p)
+      (andmap (λ (x)
+                (andmap (λ (y) (let ((lst1 (reverse (cdr x)))
+                                     (lst2 (reverse (cdr y))))
+                                 (if (equal? x y) #t
+                                     (it lst1 lst2)))) lst_p)) lst_p)
+      )
+  )
+
+
+(define (f1_2 lst_p);это 1 но без одной из проверок
+  (define (it lst1 lst2)
+    (if (empty? (cdr lst1)) (not (= (car lst1) (car lst2)))
+        (if (empty? (cdr lst2)) (not (= (car lst1) (car lst2)))
+            (if (= (car lst1) (car lst2))
+                (it (cdr lst1) (cdr lst2)) #t))))
+       
+    
+  (andmap (λ (x)
+            (andmap (λ (y) (let ((lst1 (cdr x))
+                                 (lst2 (cdr y)))
+                             (if (equal? x y) #t
+                                 (it lst1 lst2)) ) ) lst_p))lst_p)
+  )
+
+(define (f2 lst)
+  (define (it tree)
+    (if (not (pair? tree)) null
+        (append
+         (map (λ (x) (cons 0 x)) (if (empty? (car tree)) '(()) (it (car tree))))
+
+         (map (λ (x) (cons 1 x)) (if (empty? (cdr tree)) '(()) (it (cdr tree))))
+                )))
+  
+  (define lst_r (map (λ (x) (list* (car x) (list* (reverse (cdr x))))) lst))
+  (if (empty? lst) #f
+      (let ((otv (sort (append  (if (f1_2 lst) (it (code_t lst)) null)
+                          (if (f1_2 lst_r) (map reverse (it (code_t lst_r))) null))
+                 
+                 (λ (x y) (< (length x) (length y))))))
+        (if (empty? otv) #f (car otv)))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(define (f3 lst)
+  (define (it tree)
+    (cond  ((empty? tree) null)
+           ((not (pair? tree)) null)
+           ((and (pair? tree) (empty? (car tree)) (not (pair? (cdr tree)))) (list (cdr tree))) 
+           ((and (pair? tree) (empty? (cdr tree)) (not (pair? (car tree)))) (list (car tree)))
+           (else (append (it (car tree)) (it (cdr tree))))))
+           
+
+
+  (define otv (append (if (f1_2 lst) (it (code_t lst)) null)
+                      (if (f1_2 (map (λ (x) (list* (car x) (list* (reverse (cdr x))))) lst))
+                          (it (code_t (map (λ (x) (list* (car x) (list* (reverse (cdr x))))) lst)))
+                          null)))
+  (if (empty? otv) #f (car otv))
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+(define (f4 tree)
+  (define (t_depth tree)
+    (if (empty? tree) 0
+        (if (not (pair? tree)) 1
+            (max (+ 1 (t_depth (car tree))) (+ 1 (t_depth (cdr tree)))))))
+  (define (it tree n)
+    (if (empty? tree) null
+        (if (eq? 'leaf (car tree)) (list (cons (cdr tree) (expt 2 n)))
+            (append (it (if (pair? tree) (car tree) null) (- n 1)) (it (if (pair? tree) (cdr tree) null) (- n 1))))))
+        
+  (it tree (- (t_depth tree) 1) )
+    
+  )
+
+
+
