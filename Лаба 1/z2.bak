@@ -1,0 +1,14 @@
+#lang Scheme
+(define mod remainder)
+(define (f H M)
+  (let
+      (
+       (h (* 30 (mod H 12)))
+       (m (* 6 (mod M 60)))
+       )
+    (abs
+     (min
+      (- h m)
+      (- 360 (- h m))
+  
+      ))))

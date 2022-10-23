@@ -1,0 +1,6 @@
+#lang Scheme
+(define (f x1 y1 x2 y2)
+  (>
+   (+ (abs (- 1 y2)) 1)
+   (max (abs (- x2 x1)) (abs (- 1 y1)))
+     ))
